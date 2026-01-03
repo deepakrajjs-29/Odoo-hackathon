@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trip Timeline - GlobeTrotter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 15s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) translateX(100px); opacity: 0; }
+        }
+
+        /* Header */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .nav-links a:hover {
+            color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .page-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-header h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .page-header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        /* View Toggle */
+        .view-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            animation: slideUp 0.8s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .toggle-btn {
+            padding: 1rem 2.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 2px solid white;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn.active {
+            background: white;
+            color: #667eea;
+        }
+
+        .toggle-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 255, 255, 0.3);
+        }
+
+        /* Timeline View */
+        .timeline-view {
+            display: none;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .timeline-view.active {
+            display: block;
+        }
+
+        .timeline-container {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .timeline-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateX(-50%);
+        }
+
+        .timeline-item {
+            display: flex;
+            margin-bottom: 4rem;
+            position: relative;
+            animation: fadeInUp 0.6s ease;
+            animation-fill-mode: both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .timeline-item:nth-child(odd) {
+            flex-direction: row-reverse;
+        }
+
+        .timeline-content {
+            width: 45%;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .timeline-content:hover {
+            transform: scale(1.05);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            top: 2rem;
+            width: 30px;
+            height: 30px;
+            background: white;
+            border: 4px solid #667eea;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+            animation: pulse 2s infinite;
+        }
+
+        .timeline-date {
+            position: absolute;
+            left: 50%;
+            top: 5rem;
+            transform: translateX(-50%);
+            background: white;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #667eea;
+            white-space: nowrap;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .event-time {
+            font-size: 0.9rem;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .event-title {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .event-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .event-location {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        .event-location::before {
+            content: '📍';
+        }
+
+        /* Calendar View */
+        .calendar-view {
+            display: none;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .calendar-view.active {
+            display: block;
+        }
+
+        .calendar-header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px 20px 0 0;
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .calendar-month {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .calendar-nav-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-nav-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .calendar-grid {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 0 0 20px 20px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .calendar-weekday {
+            text-align: center;
+            font-weight: 600;
+            color: #667eea;
+            padding: 1rem;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1rem;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            border: 2px solid #e0e0e0;
+            border-radius: 15px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .calendar-day.has-event {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-color: transparent;
+        }
+
+        .calendar-day.today {
+            border-color: #667eea;
+            border-width: 3px;
+        }
+
+        .day-number {
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+
+        .day-events {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+        }
+
+        .event-dot {
+            width: 6px;
+            height: 6px;
+            background: white;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 0.2rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .timeline-line {
+                left: 20px;
+            }
+
+            .timeline-item {
+                flex-direction: column !important;
+                padding-left: 60px;
+            }
+
+            .timeline-content {
+                width: 100%;
+            }
+
+            .timeline-dot {
+                left: 20px;
+            }
+
+            .timeline-date {
+                left: 20px;
+                transform: none;
+            }
+
+            .calendar-days {
+                gap: 0.5rem;
+            }
+
+            .calendar-day {
+                padding: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">🌍 GlobeTrotter</div>
+            <ul class="nav-links">
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="my-trips.html">My Trips</a></li>
+                <li><a href="budget.html">Budget</a></li>
+                <li><a href="timeline.html">Timeline</a></li>
+            </ul>
+            <div class="user-info">
+                <div class="user-avatar" onclick="window.location.href='profile.html'">JD</div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="page-header">
+            <h1>📅 Trip Timeline</h1>
+            <p>Visualize your journey day by day</p>
+        </div>
+
+        <!-- View Toggle -->
+        <div class="view-toggle">
+            <button class="toggle-btn active" onclick="switchView('timeline')">Timeline View</button>
+            <button class="toggle-btn" onclick="switchView('calendar')">Calendar View</button>
+        </div>
+
+        <!-- Timeline View -->
+        <div class="timeline-view active" id="timelineView">
+            <div class="timeline-container" id="timelineContainer">
+                <div class="timeline-line"></div>
+            </div>
+        </div>
+
+        <!-- Calendar View -->
+        <div class="calendar-view" id="calendarView">
+            <div class="calendar-header">
+                <div class="calendar-month" id="calendarMonth">March 2024</div>
+                <div class="calendar-nav">
+                    <button class="calendar-nav-btn" onclick="changeMonth(-1)">◀</button>
+                    <button class="calendar-nav-btn" onclick="changeMonth(1)">▶</button>
+                </div>
+            </div>
+            <div class="calendar-grid">
+                <div class="calendar-weekdays">
+                    <div class="calendar-weekday">Sun</div>
+                    <div class="calendar-weekday">Mon</div>
+                    <div class="calendar-weekday">Tue</div>
+                    <div class="calendar-weekday">Wed</div>
+                    <div class="calendar-weekday">Thu</div>
+                    <div class="calendar-weekday">Fri</div>
+                    <div class="calendar-weekday">Sat</div>
+                </div>
+                <div class="calendar-days" id="calendarDays"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create animated particles
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 15 + 's';
+            particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        // Sample events data
+        const events = [
+            {
+                date: "2024-03-15",
+                time: "10:00 AM",
+                title: "Arrive in Paris",
+                description: "Check into Hotel Le Marais and explore the neighborhood",
+                location: "Paris, France"
+            },
+            {
+                date: "2024-03-15",
+                time: "3:00 PM",
+                title: "Eiffel Tower Visit",
+                description: "Skip-the-line tour with sunset viewing from the top",
+                location: "Eiffel Tower"
+            },
+            {
+                date: "2024-03-16",
+                time: "9:00 AM",
+                title: "Louvre Museum",
+                description: "Guided tour of highlights including Mona Lisa",
+                location: "Musée du Louvre"
+            },
+            {
+                date: "2024-03-16",
+                time: "7:00 PM",
+                title: "Seine River Dinner Cruise",
+                description: "Romantic dinner cruise with live music",
+                location: "Seine River"
+            },
+            {
+                date: "2024-03-17",
+                time: "11:00 AM",
+                title: "Versailles Palace",
+                description: "Full day trip to explore the palace and gardens",
+                location: "Versailles"
+            },
+            {
+                date: "2024-03-18",
+                time: "10:00 AM",
+                title: "Montmartre Walking Tour",
+                description: "Explore artistic neighborhood and Sacré-Cœur",
+                location: "Montmartre"
+            },
+            {
+                date: "2024-03-18",
+                time: "2:00 PM",
+                title: "Shopping on Champs-Élysées",
+                description: "Browse luxury shops and visit Arc de Triomphe",
+                location: "Champs-Élysées"
+            },
+            {
+                date: "2024-03-19",
+                time: "12:00 PM",
+                title: "Departure",
+                description: "Check out and head to airport",
+                location: "Paris CDG Airport"
+            }
+        ];
+
+        let currentMonth = 2; // March (0-indexed)
+        let currentYear = 2024;
+
+        // Initialize
+        function init() {
+            renderTimeline();
+            renderCalendar();
+        }
+
+        // Switch view
+        function switchView(view) {
+            const timelineView = document.getElementById('timelineView');
+            const calendarView = document.getElementById('calendarView');
+            const buttons = document.querySelectorAll('.toggle-btn');
+
+            if (view === 'timeline') {
+                timelineView.classList.add('active');
+                calendarView.classList.remove('active');
+                buttons[0].classList.add('active');
+                buttons[1].classList.remove('active');
+            } else {
+                timelineView.classList.remove('active');
+                calendarView.classList.add('active');
+                buttons[0].classList.remove('active');
+                buttons[1].classList.add('active');
+            }
+        }
+
+        // Render timeline
+        function renderTimeline() {
+            const container = document.getElementById('timelineContainer');
+            const timelineLine = container.querySelector('.timeline-line');
+            
+            const groupedEvents = events.reduce((acc, event) => {
+                if (!acc[event.date]) {
+                    acc[event.date] = [];
+                }
+                acc[event.date].push(event);
+                return acc;
+            }, {});
+
+            let html = '';
+            let delay = 0;
+
+            Object.keys(groupedEvents).forEach((date, index) => {
+                const dateEvents = groupedEvents[date];
+                const formattedDate = new Date(date).toLocaleDateString('en-US', { 
+                    weekday: 'long', 
+                    month: 'long', 
+                    day: 'numeric' 
+                });
+
+                dateEvents.forEach((event, eventIndex) => {
+                    html += `
+                        <div class="timeline-item" style="animation-delay: ${delay}s">
+                            <div class="timeline-content">
+                                <div class="event-time">${event.time}</div>
+                                <h3 class="event-title">${event.title}</h3>
+                                <p class="event-description">${event.description}</p>
+                                <div class="event-location">${event.location}</div>
+                            </div>
+                            ${eventIndex === 0 ? `
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-date">${formattedDate}</div>
+                            ` : ''}
+                        </div>
+                    `;
+                    delay += 0.1;
+                });
+            });
+
+            container.innerHTML = '<div class="timeline-line"></div>' + html;
+        }
+
+        // Render calendar
+        function renderCalendar() {
+            const monthNames = ["January", "February", "March", "April", "May", "June",
+                "July", "August", "September", "October", "November", "December"
+            ];
+
+            document.getElementById('calendarMonth').textContent = 
+                `${monthNames[currentMonth]} ${currentYear}`;
+
+            const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+            const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            const today = new Date();
+            
+            const calendarDays = document.getElementById('calendarDays');
+            let html = '';
+
+            // Empty cells for days before month starts
+            for (let i = 0; i < firstDay; i++) {
+                html += '<div class="calendar-day" style="opacity: 0.3;"></div>';
+            }
+
+            // Days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                const dayEvents = events.filter(e => e.date === dateStr);
+                const isToday = today.getDate() === day && 
+                              today.getMonth() === currentMonth && 
+                              today.getFullYear() === currentYear;
+                
+                html += `
+                    <div class="calendar-day ${dayEvents.length > 0 ? 'has-event' : ''} ${isToday ? 'today' : ''}">
+                        <div class="day-number">${day}</div>
+                        ${dayEvents.length > 0 ? `
+                            <div class="day-events">
+                                ${dayEvents.map(() => '<span class="event-dot"></span>').join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }
+
+            calendarDays.innerHTML = html;
+        }
+
+        // Change month
+        function changeMonth(delta) {
+            currentMonth += delta;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            } else if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

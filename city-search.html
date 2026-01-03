@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Explore Cities - GlobeTrotter</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a1a;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .space-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #000000 0%, #0a0a2e 50%, #16213e 100%);
+            z-index: 0;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkling 3s infinite;
+        }
+
+        @keyframes twinkling {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 8px 16px;
+            border-radius: 8px;
+        }
+
+        .nav-links a:hover {
+            color: white;
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .search-header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2.5rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .search-header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 30px rgba(102, 126, 234, 0.8);
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 1.2rem 4rem 1.2rem 1.5rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .search-input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 1.5rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.5rem;
+            pointer-events: none;
+            filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.6));
+        }
+
+        .filter-chips {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            animation: slideIn 0.6s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .chip {
+            padding: 0.7rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .chip:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+            border-color: #667eea;
+        }
+
+        .chip.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .cities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .city-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            transition: all 0.4s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .city-card:hover {
+            transform: translateY(-15px);
+            box-shadow: 0 30px 80px rgba(102, 126, 234, 0.4);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+
+        .city-image {
+            width: 100%;
+            height: 220px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .city-image::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .city-content {
+            padding: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .city-name {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        .city-country {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .city-stats {
+            display: flex;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+        }
+
+        .city-description {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .city-tags {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+
+        .tag {
+            padding: 0.4rem 0.8rem;
+            background: rgba(102, 126, 234, 0.2);
+            color: #667eea;
+            border-radius: 15px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-add-city {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-add-city:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .popular-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: linear-gradient(135deg, #ff6b6b, #ff8e53);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            animation: pulse 2s infinite;
+            z-index: 2;
+            box-shadow: 0 5px 20px rgba(255, 107, 107, 0.5);
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2.5rem;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translate(-50%, -40%); }
+            to { opacity: 1; transform: translate(-50%, -50%); }
+        }
+
+        .modal-content h2 {
+            color: white;
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+        }
+
+        .form-group select {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .form-group select option {
+            background: #16213e;
+            color: white;
+        }
+
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:hover {
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .cities-grid { grid-template-columns: 1fr; }
+            .search-header h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="space-background"></div>
+    <div class="stars" id="stars"></div>
+
+    <header>
+        <nav>
+            <a href="dashboard.html" class="logo">
+                <img src="logo.jpeg" alt="GlobeTrotter">
+                GlobeTrotter
+            </a>
+            <div class="nav-links">
+                <a href="dashboard.html">Home</a>
+                <a href="my-trips.html">My Trips</a>
+                <a href="city-search.html">Explore</a>
+                <a href="profile.html">Profile</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="search-header">
+            <h1>🌍 Explore Destinations</h1>
+            <div class="search-container">
+                <input type="text" class="search-input" id="searchInput" placeholder="Search for cities...">
+                <span class="search-icon">🔍</span>
+            </div>
+            <div class="filter-chips">
+                <div class="chip active" data-continent="all">All</div>
+                <div class="chip" data-continent="Europe">Europe</div>
+                <div class="chip" data-continent="Asia">Asia</div>
+                <div class="chip" data-continent="Americas">Americas</div>
+                <div class="chip" data-continent="Africa">Africa</div>
+                <div class="chip" data-continent="Oceania">Oceania</div>
+            </div>
+        </div>
+
+        <div class="cities-grid" id="citiesGrid"></div>
+    </div>
+
+    <div class="modal" id="addCityModal">
+        <div class="modal-content">
+            <h2>Add to Trip</h2>
+            <div class="form-group">
+                <label>Select Trip</label>
+                <select id="tripSelect">
+                    <option value="">Choose a trip...</option>
+                </select>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-primary" onclick="confirmAddCity()">Add to Trip</button>
+                <button class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function createStars() {
+            const c = document.getElementById('stars');
+            for (let i = 0; i < 150; i++) {
+                const s = document.createElement('div');
+                s.className = 'star';
+                s.style.left = Math.random() * 100 + '%';
+                s.style.top = Math.random() * 100 + '%';
+                s.style.animationDelay = Math.random() * 3 + 's';
+                s.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                c.appendChild(s);
+            }
+        }
+        createStars();
+
+        const cities = [
+            { name: 'Paris', country: 'France', continent: 'Europe', icon: '🗼', rating: 4.8, visitors: '15M', popular: true, description: 'The City of Light awaits with art, culture, and romance.', tags: ['Art', 'Culture', 'Food'] },
+            { name: 'Tokyo', country: 'Japan', continent: 'Asia', icon: '🗾', rating: 4.9, visitors: '14M', popular: true, description: 'Experience the perfect blend of tradition and technology.', tags: ['Technology', 'Culture', 'Food'] },
+            { name: 'New York', country: 'USA', continent: 'Americas', icon: '🗽', rating: 4.7, visitors: '13M', popular: true, description: 'The city that never sleeps offers endless possibilities.', tags: ['Urban', 'Culture', 'Shopping'] },
+            { name: 'Rome', country: 'Italy', continent: 'Europe', icon: '🏛️', rating: 4.8, visitors: '10M', popular: false, description: 'Walk through history in the Eternal City.', tags: ['History', 'Art', 'Food'] },
+            { name: 'Barcelona', country: 'Spain', continent: 'Europe', icon: '🏖️', rating: 4.7, visitors: '9M', popular: false, description: 'Discover Gaudí\'s masterpieces and Mediterranean charm.', tags: ['Architecture', 'Beach', 'Culture'] },
+            { name: 'Dubai', country: 'UAE', continent: 'Asia', icon: '🏙️', rating: 4.8, visitors: '16M', popular: true, description: 'Experience luxury and innovation in the desert.', tags: ['Luxury', 'Modern', 'Shopping'] },
+            { name: 'London', country: 'UK', continent: 'Europe', icon: '🏰', rating: 4.7, visitors: '19M', popular: true, description: 'Royal palaces, world-class museums, and British charm.', tags: ['History', 'Culture', 'Urban'] },
+            { name: 'Singapore', country: 'Singapore', continent: 'Asia', icon: '🦁', rating: 4.8, visitors: '14M', popular: false, description: 'A futuristic garden city with amazing food.', tags: ['Modern', 'Food', 'Nature'] },
+            { name: 'Sydney', country: 'Australia', continent: 'Oceania', icon: '🎭', rating: 4.7, visitors: '12M', popular: false, description: 'Stunning harbor, beaches, and laid-back lifestyle.', tags: ['Beach', 'Nature', 'Urban'] },
+            { name: 'Istanbul', country: 'Turkey', continent: 'Asia', icon: '🕌', rating: 4.6, visitors: '13M', popular: false, description: 'Where East meets West in a historic crossroads.', tags: ['History', 'Culture', 'Food'] },
+            { name: 'Amsterdam', country: 'Netherlands', continent: 'Europe', icon: '🚲', rating: 4.7, visitors: '9M', popular: false, description: 'Charming canals, bikes, and liberal culture.', tags: ['Culture', 'Art', 'History'] },
+            { name: 'Bangkok', country: 'Thailand', continent: 'Asia', icon: '🛕', rating: 4.6, visitors: '23M', popular: true, description: 'Vibrant street life, temples, and incredible food.', tags: ['Culture', 'Food', 'Adventure'] },
+            { name: 'Cape Town', country: 'South Africa', continent: 'Africa', icon: '⛰️', rating: 4.7, visitors: '2M', popular: false, description: 'Dramatic landscapes and diverse culture.', tags: ['Nature', 'Adventure', 'Beach'] },
+            { name: 'Rio de Janeiro', country: 'Brazil', continent: 'Americas', icon: '🏖️', rating: 4.6, visitors: '6M', popular: false, description: 'Beaches, mountains, and carnival spirit.', tags: ['Beach', 'Culture', 'Nature'] },
+            { name: 'Berlin', country: 'Germany', continent: 'Europe', icon: '🐻', rating: 4.6, visitors: '13M', popular: false, description: 'History, nightlife, and creative energy.', tags: ['History', 'Culture', 'Nightlife'] },
+            { name: 'Bali', country: 'Indonesia', continent: 'Asia', icon: '🏝️', rating: 4.8, visitors: '6M', popular: true, description: 'Tropical paradise with temples and beaches.', tags: ['Beach', 'Nature', 'Relaxation'] }
+        ];
+
+        let filteredCities = [...cities];
+        let selectedCity = null;
+
+        function renderCities() {
+            const grid = document.getElementById('citiesGrid');
+            grid.innerHTML = filteredCities.map(city => `
+                <div class="city-card">
+                    ${city.popular ? '<div class="popular-badge">🔥 Popular</div>' : ''}
+                    <div class="city-image">${city.icon}</div>
+                    <div class="city-content">
+                        <div class="city-name">${city.name}</div>
+                        <div class="city-country">${city.country}</div>
+                        <div class="city-stats">
+                            <div class="stat">⭐ ${city.rating}</div>
+                            <div class="stat">👥 ${city.visitors}/year</div>
+                        </div>
+                        <div class="city-description">${city.description}</div>
+                        <div class="city-tags">
+                            ${city.tags.map(tag => `<span class="tag">${tag}</span>`).join('')}
+                        </div>
+                        <button class="btn-add-city" onclick="openAddModal('${city.name}', '${city.country}')">
+                            ➕ Add to Trip
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase();
+            filteredCities = cities.filter(city => 
+                city.name.toLowerCase().includes(query) ||
+                city.country.toLowerCase().includes(query) ||
+                city.tags.some(tag => tag.toLowerCase().includes(query))
+            );
+            renderCities();
+        });
+
+        document.querySelectorAll('.chip').forEach(chip => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+                chip.classList.add('active');
+                
+                const continent = chip.dataset.continent;
+                if (continent === 'all') {
+                    filteredCities = [...cities];
+                } else {
+                    filteredCities = cities.filter(city => city.continent === continent);
+                }
+                renderCities();
+            });
+        });
+
+        function openAddModal(cityName, country) {
+            selectedCity = { name: cityName, country: country };
+            document.getElementById('addCityModal').style.display = 'block';
+        }
+
+        function closeModal() {
+            document.getElementById('addCityModal').style.display = 'none';
+            selectedCity = null;
+        }
+
+        function confirmAddCity() {
+            const tripId = document.getElementById('tripSelect').value;
+            if (!tripId) {
+                alert('Please select a trip');
+                return;
+            }
+            alert(`Added ${selectedCity.name} to your trip!`);
+            closeModal();
+        }
+
+        document.getElementById('addCityModal').addEventListener('click', (e) => {
+            if (e.target.id === 'addCityModal') {
+                closeModal();
+            }
+        });
+
+        renderCities();
+    </script>
+</body>
+</html>

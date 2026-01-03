@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Activity Search - GlobeTrotter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a1a;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Space Background */
+        .space-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #000000 0%, #0a0a2e 50%, #16213e 100%);
+            z-index: 0;
+        }
+
+        /* Stars */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkling 3s infinite;
+        }
+
+        @keyframes twinkling {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* Header */
+        header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: transform 0.3s ease;
+        }
+
+        .logo:hover {
+            transform: scale(1.05);
+        }
+
+        .logo img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+            padding: 8px 16px;
+            border-radius: 8px;
+        }
+
+        .nav-links a:hover {
+            color: white;
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .user-avatar:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 5px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .page-header {
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-header h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+            text-shadow: 0 0 30px rgba(102, 126, 234, 0.8);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .page-header p {
+            font-size: 1.2rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Search Layout */
+        .search-layout {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 2rem;
+            animation: slideUp 0.8s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Filters Sidebar */
+        .filters-sidebar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            height: fit-content;
+            position: sticky;
+            top: 100px;
+        }
+
+        .filter-section {
+            margin-bottom: 2rem;
+        }
+
+        .filter-section h3 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .filter-section h3::before {
+            content: '';
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 2px;
+        }
+
+        .filter-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .filter-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 5px;
+            border-radius: 8px;
+        }
+
+        .filter-checkbox:hover {
+            transform: translateX(5px);
+            background: rgba(102, 126, 234, 0.1);
+        }
+
+        .filter-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .filter-checkbox label {
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95rem;
+        }
+
+        .price-range {
+            margin-top: 1rem;
+        }
+
+        .price-range input[type="range"] {
+            width: 100%;
+            accent-color: #667eea;
+            cursor: pointer;
+        }
+
+        .price-display {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .clear-filters {
+            width: 100%;
+            padding: 0.8rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .clear-filters:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        /* Activities Section */
+        .activities-section {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .search-bar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            display: flex;
+            gap: 1rem;
+        }
+
+        .search-input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        .search-input-wrapper input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            font-size: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .search-input-wrapper input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .search-input-wrapper input:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        .search-input-wrapper svg {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            fill: rgba(255, 255, 255, 0.5);
+        }
+
+        .search-btn {
+            padding: 1rem 2.5rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .search-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .results-count {
+            font-size: 1.1rem;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .sort-dropdown {
+            padding: 0.8rem 1.5rem;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .sort-dropdown:hover {
+            transform: translateY(-2px);
+            border-color: #667eea;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .sort-dropdown option {
+            background: #16213e;
+            color: white;
+        }
+
+        .activities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+        }
+
+        .activity-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            transition: all 0.4s ease;
+            cursor: pointer;
+            animation: fadeInUp 0.6s ease;
+            animation-fill-mode: both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .activity-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 80px rgba(102, 126, 234, 0.4);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+
+        .activity-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            transition: all 0.4s ease;
+        }
+
+        .activity-card:hover .activity-image {
+            transform: scale(1.1);
+        }
+
+        .activity-content {
+            padding: 1.5rem;
+        }
+
+        .activity-category {
+            display: inline-block;
+            padding: 0.4rem 1rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-bottom: 0.8rem;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .activity-title {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: white;
+        }
+
+        .activity-location {
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .activity-location svg {
+            width: 16px;
+            height: 16px;
+            fill: #667eea;
+        }
+
+        .activity-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .activity-price {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
+            text-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+        }
+
+        .activity-rating {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            color: #ffc107;
+            font-weight: 600;
+            filter: drop-shadow(0 0 5px rgba(255, 193, 7, 0.5));
+        }
+
+        .add-to-trip-btn {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .add-to-trip-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .search-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .filters-sidebar {
+                position: static;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+
+            .page-header h1 {
+                font-size: 2rem;
+            }
+
+            .activities-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .search-bar {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Space Background -->
+    <div class="space-background"></div>
+    
+    <!-- Stars -->
+    <div class="stars" id="stars"></div>
+
+    <!-- Header -->
+    <header>
+        <nav>
+            <div class="logo">
+                <img src="logo.jpeg" alt="GlobeTrotter">
+                GlobeTrotter
+            </div>
+            <ul class="nav-links">
+                <li><a href="dashboard.html">Dashboard</a></li>
+                <li><a href="my-trips.html">My Trips</a></li>
+                <li><a href="city-search.html">Cities</a></li>
+                <li><a href="activity-search.html">Activities</a></li>
+            </ul>
+            <div class="user-info">
+                <div class="user-avatar" onclick="window.location.href='profile.html'">JD</div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="page-header">
+            <h1>Discover Activities</h1>
+            <p>Find amazing experiences for your next adventure</p>
+        </div>
+
+        <div class="search-layout">
+            <!-- Filters Sidebar -->
+            <aside class="filters-sidebar">
+                <div class="filter-section">
+                    <h3>Category</h3>
+                    <div class="filter-options">
+                        <div class="filter-checkbox">
+                            <input type="checkbox" id="adventure" value="Adventure" checked>
+                            <label for="adventure">Adventure</label>
+                        </div>
+                        <div class="filter-checkbox">
+                            <input type="checkbox" id="cultural" value="Cultural" checked>
+                            <label for="cultural">Cultural</label>
+                        </div>
+                        <div class="filter-checkbox">
+                            <input type="checkbox" id="food" value="Food & Dining" checked>
+                            <label for="food">Food & Dining</label>
+                        </div>
+                        <div class="filter-checkbox">
+                            <input type="checkbox" id="nature" value="Nature" checked>
+                            <label for="nature">Nature</label>
+                        </div>
+                        <div class="filter-checkbox">
+                            <input type="checkbox" id="shopping" value="Shopping" checked>
+                            <label for="shopping">Shopping</label>
+                        </div>
+                        <div class="filter-checkbox">
+                            <input type="checkbox" id="entertainment" value="Entertainment" checked>
+                            <label for="entertainment">Entertainment</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h3>Price Range</h3>
+                    <div class="price-range">
+                        <input type="range" id="priceRange" min="0" max="500" value="500" step="10">
+                        <div class="price-display">
+                            <span>$0</span>
+                            <span id="maxPrice">$500</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h3>Rating</h3>
+                    <div class="filter-options">
+                        <div class="filter-checkbox">
+                            <input type="checkbox" id="rating5" value="5" checked>
+                            <label for="rating5">5 Stars</label>
+                        </div>
+                        <div class="filter-checkbox">
+                            <input type="checkbox" id="rating4" value="4" checked>
+                            <label for="rating4">4+ Stars</label>
+                        </div>
+                        <div class="filter-checkbox">
+                            <input type="checkbox" id="rating3" value="3" checked>
+                            <label for="rating3">3+ Stars</label>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="clear-filters" onclick="clearFilters()">Clear All Filters</button>
+            </aside>
+
+            <!-- Activities Section -->
+            <div class="activities-section">
+                <div class="search-bar">
+                    <div class="search-input-wrapper">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+                        </svg>
+                        <input type="text" id="searchInput" placeholder="Search for activities...">
+                    </div>
+                    <button class="search-btn" onclick="searchActivities()">Search</button>
+                </div>
+
+                <div class="results-header">
+                    <div class="results-count">Showing <span id="resultsCount">0</span> activities</div>
+                    <select class="sort-dropdown" onchange="sortActivities(this.value)">
+                        <option value="relevance">Sort by Relevance</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                        <option value="rating">Highest Rated</option>
+                        <option value="popular">Most Popular</option>
+                    </select>
+                </div>
+
+                <div class="activities-grid" id="activitiesGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create stars
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 150; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+        createStars();
+
+        // Sample activities data with open-source images from Unsplash
+        const activities = [
+            {
+                id: 1,
+                title: "Eiffel Tower Skip-the-Line Tour",
+                category: "Cultural",
+                location: "Paris, France",
+                price: 89,
+                rating: 4.8,
+                image: "https://images.unsplash.com/photo-1511739001486-6bfe10ce785f?w=400&auto=format&fit=crop"
+            },
+            {
+                id: 2,
+                title: "Hot Air Balloon Ride",
+                category: "Adventure",
+                location: "Cappadocia, Turkey",
+                price: 245,
+                rating: 4.9,
+                image: "https://images.unsplash.com/photo-1519904981063-b0cf448d479e?w=400&auto=format&fit=crop"
+            },
+            {
+                id: 3,
+                title: "Sushi Making Class",
+                category: "Food & Dining",
+                location: "Tokyo, Japan",
+                price: 95,
+                rating: 4.7,
+                image: "https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?w=400&auto=format&fit=crop"
+            },
+            {
+                id: 4,
+                title: "Gondola Ride & Serenade",
+                category: "Entertainment",
+                location: "Venice, Italy",
+                price: 120,
+                rating: 4.6,
+                image: "https://images.unsplash.com/photo-1523906834658-6e24ef2386f9?w=400&auto=format&fit=crop"
+            },
+            {
+                id: 5,
+                title: "Safari Adventure",
+                category: "Nature",
+                location: "Serengeti, Tanzania",
+                price: 450,
+                rating: 5.0,
+                image: "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=400&auto=format&fit=crop"
+            },
+            {
+                id: 6,
+                title: "Grand Bazaar Tour",
+                category: "Shopping",
+                location: "Istanbul, Turkey",
+                price: 35,
+                rating: 4.5,
+                image: "https://images.unsplash.com/photo-1520483601560-45645ebbc30c?w=400&auto=format&fit=crop"
+            },
+            {
+                id: 7,
+                title: "Scuba Diving Experience",
+                category: "Adventure",
+                location: "Great Barrier Reef, Australia",
+                price: 180,
+                rating: 4.9,
+                image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?w=400&auto=format&fit=crop"
+            },
+            {
+                id: 8,
+                title: "Louvre Museum Tour",
+                category: "Cultural",
+                location: "Paris, France",
+                price: 75,
+                rating: 4.7,
+                image: "https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=400&auto=format&fit=crop"
+            },
+            {
+                id: 9,
+                title: "Cherry Blossom Viewing",
+                category: "Nature",
+                location: "Kyoto, Japan",
+                price: 50,
+                rating: 4.8,
+                image: "https://images.unsplash.com/photo-1522383225653-ed111181a951?w=400&auto=format&fit=crop"
+            },
+            {
+                id: 10,
+                title: "Broadway Show Experience",
+                category: "Entertainment",
+                location: "New York, USA",
+                price: 195,
+                rating: 4.9,
+                image: "https://images.unsplash.com/photo-1503095396549-807759245b35?w=400&auto=format&fit=crop"
+            },
+            {
+                id: 11,
+                title: "Wine Tasting Tour",
+                category: "Food & Dining",
+                location: "Tuscany, Italy",
+                price: 135,
+                rating: 4.8,
+                image: "https://images.unsplash.com/photo-1510812431401-41d2bd2722f3?w=400&auto=format&fit=crop"
+            },
+            {
+                id: 12,
+                title: "Souq Shopping Experience",
+                category: "Shopping",
+                location: "Dubai, UAE",
+                price: 40,
+                rating: 4.6,
+                image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?w=400&auto=format&fit=crop"
+            }
+        ];
+
+        let filteredActivities = [...activities];
+
+        // Initialize
+        function init() {
+            displayActivities(filteredActivities);
+            attachFilterListeners();
+        }
+
+        // Display activities
+        function displayActivities(activitiesToShow) {
+            const grid = document.getElementById('activitiesGrid');
+            const resultsCount = document.getElementById('resultsCount');
+            
+            resultsCount.textContent = activitiesToShow.length;
+            
+            grid.innerHTML = activitiesToShow.map((activity, index) => `
+                <div class="activity-card" style="animation-delay: ${index * 0.1}s">
+                    <img src="${activity.image}" alt="${activity.title}" class="activity-image">
+                    <div class="activity-content">
+                        <span class="activity-category">${activity.category}</span>
+                        <h3 class="activity-title">${activity.title}</h3>
+                        <div class="activity-location">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+                            </svg>
+                            ${activity.location}
+                        </div>
+                        <div class="activity-details">
+                            <div class="activity-price">$${activity.price}</div>
+                            <div class="activity-rating">⭐ ${activity.rating}</div>
+                        </div>
+                        <button class="add-to-trip-btn" onclick="addToTrip(${activity.id})">
+                            Add to Trip
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Attach filter listeners
+        function attachFilterListeners() {
+            // Category filters
+            document.querySelectorAll('.filter-checkbox input[type="checkbox"]').forEach(checkbox => {
+                checkbox.addEventListener('change', applyFilters);
+            });
+
+            // Price range
+            const priceRange = document.getElementById('priceRange');
+            priceRange.addEventListener('input', function() {
+                document.getElementById('maxPrice').textContent = `${this.value}`;
+                applyFilters();
+            });
+
+            // Search input
+            document.getElementById('searchInput').addEventListener('input', applyFilters);
+        }
+
+        // Apply filters
+        function applyFilters() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const maxPrice = parseInt(document.getElementById('priceRange').value);
+            
+            // Get selected categories
+            const selectedCategories = Array.from(
+                document.querySelectorAll('.filter-checkbox input[type="checkbox"]:checked')
+            )
+            .filter(cb => !cb.id.startsWith('rating'))
+            .map(cb => cb.value);
+
+            // Get selected ratings
+            const selectedRatings = Array.from(
+                document.querySelectorAll('.filter-checkbox input[id^="rating"]:checked')
+            ).map(cb => parseFloat(cb.value));
+
+            filteredActivities = activities.filter(activity => {
+                const matchesSearch = activity.title.toLowerCase().includes(searchTerm) ||
+                                    activity.location.toLowerCase().includes(searchTerm);
+                const matchesCategory = selectedCategories.includes(activity.category);
+                const matchesPrice = activity.price <= maxPrice;
+                const matchesRating = selectedRatings.some(minRating => activity.rating >= minRating);
+
+                return matchesSearch && matchesCategory && matchesPrice && matchesRating;
+            });
+
+            displayActivities(filteredActivities);
+        }
+
+        // Search activities
+        function searchActivities() {
+            applyFilters();
+        }
+
+        // Sort activities
+        function sortActivities(sortBy) {
+            let sorted = [...filteredActivities];
+
+            switch(sortBy) {
+                case 'price-low':
+                    sorted.sort((a, b) => a.price - b.price);
+                    break;
+                case 'price-high':
+                    sorted.sort((a, b) => b.price - a.price);
+                    break;
+                case 'rating':
+                    sorted.sort((a, b) => b.rating - a.rating);
+                    break;
+                case 'popular':
+                    sorted.sort((a, b) => b.rating - a.rating);
+                    break;
+            }
+
+            displayActivities(sorted);
+        }
+
+        // Clear filters
+        function clearFilters() {
+            document.querySelectorAll('.filter-checkbox input[type="checkbox"]').forEach(cb => {
+                cb.checked = true;
+            });
+            document.getElementById('priceRange').value = 500;
+            document.getElementById('maxPrice').textContent = '$500';
+            document.getElementById('searchInput').value = '';
+            applyFilters();
+        }
+
+        // Add to trip
+        function addToTrip(activityId) {
+            const activity = activities.find(a => a.id === activityId);
+            alert(`Added "${activity.title}" to your trip! Go to your itinerary builder to organize it.`);
+        }
+
+        // Initialize on load
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GlobeTrotter - Login</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: #0a0a1a;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      /* Space Background */
+      .space-background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          180deg,
+          #000000 0%,
+          #0a0a2e 50%,
+          #16213e 100%
+        );
+        z-index: 0;
+      }
+
+      /* Rotating Earth */
+      .earth-container {
+        position: fixed;
+        right: -125px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 250px;
+        height: 250px;
+        z-index: 1;
+        opacity: 0.3;
+      }
+
+      .section-banner {
+        height: 250px;
+        width: 250px;
+        position: relative;
+        transition: left 0.3s linear;
+        background: url("data:image/jpeg;base64,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");
+        background-size: cover;
+        background-position: left;
+        bottom: 0px;
+        border-radius: 50%;
+        animation: earthRotate 30s linear 0s infinite;
+        box-shadow: 0px 0 20px RGBA(255, 255, 255, 0.2),
+          -5px 0px 8px #c3f4ff inset, 15px 2px 25px #000 inset,
+          -24px -2px 34px #c3f4ff99 inset, 250px 0px 44px #00000066 inset,
+          150px 0px 38px #000000aa inset;
+      }
+
+      @keyframes earthRotate {
+        0% {
+          background-position: 0 0;
+        }
+        100% {
+          background-position: 400px 0;
+        }
+      }
+
+      /* Stars */
+      .stars {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        z-index: 1;
+      }
+
+      .star {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: white;
+        border-radius: 50%;
+        animation: twinkling 3s infinite;
+      }
+
+      @keyframes twinkling {
+        0%,
+        100% {
+          opacity: 0.3;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      /* Container */
+      .container {
+        position: relative;
+        z-index: 10;
+        background: rgba(255, 255, 255, 0.1);
+        backdrop-filter: blur(20px);
+        padding: 50px 40px;
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5),
+          0 0 80px rgba(102, 126, 234, 0.1);
+        width: 90%;
+        max-width: 450px;
+        animation: slideUp 0.6s ease-out;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+      }
+
+      .container:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 25px 70px rgba(0, 0, 0, 0.6),
+          0 0 100px rgba(102, 126, 234, 0.2);
+      }
+
+      @keyframes slideUp {
+        from {
+          opacity: 0;
+          transform: translateY(50px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Logo */
+      .logo {
+        text-align: center;
+        margin-bottom: 40px;
+      }
+
+      .logo-image {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 20px;
+        background: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        animation: float 3s ease-in-out infinite;
+        transition: transform 0.3s ease;
+        overflow: hidden;
+        border: 3px solid rgba(102, 126, 234, 0.5);
+      }
+
+      .logo-image:hover {
+        transform: scale(1.1) rotate(5deg);
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+
+      .logo-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .logo h1 {
+        font-size: 2.2em;
+        color: #ffffff;
+        margin-bottom: 8px;
+        text-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+        font-weight: 700;
+        letter-spacing: 1px;
+      }
+
+      .logo p {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.9em;
+        font-weight: 300;
+      }
+
+      /* Form Groups */
+      .form-group {
+        margin-bottom: 25px;
+        position: relative;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 10px;
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+        font-size: 0.95em;
+        transition: color 0.3s ease;
+      }
+
+      .input-wrapper {
+        position: relative;
+      }
+
+      .input-icon {
+        position: absolute;
+        left: 15px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255, 255, 255, 0.5);
+        transition: color 0.3s ease;
+      }
+
+      .form-group input {
+        width: 100%;
+        padding: 15px 15px 15px 45px;
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        font-size: 1em;
+        transition: all 0.4s ease;
+        background: rgba(255, 255, 255, 0.05);
+        color: white;
+      }
+
+      .form-group input::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: #667eea;
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+      }
+
+      .form-group input:focus + .input-icon {
+        color: #667eea;
+      }
+
+      /* Buttons */
+      .btn {
+        width: 100%;
+        padding: 16px;
+        border: none;
+        border-radius: 12px;
+        font-size: 1.05em;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.4s ease;
+        position: relative;
+        overflow: hidden;
+        letter-spacing: 0.5px;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+      }
+
+      .btn-primary:active {
+        transform: translateY(-1px);
+      }
+
+      .btn::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.3);
+        transform: translate(-50%, -50%);
+        transition: width 0.6s, height 0.6s;
+      }
+
+      .btn:hover::before {
+        width: 400px;
+        height: 400px;
+      }
+
+      /* Toggle Form */
+      .toggle-form {
+        text-align: center;
+        margin-top: 25px;
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 0.95em;
+      }
+
+      .toggle-form a {
+        color: #667eea;
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        position: relative;
+      }
+
+      .toggle-form a::after {
+        content: "";
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: -2px;
+        left: 50%;
+        background: #667eea;
+        transition: all 0.3s ease;
+        transform: translateX(-50%);
+      }
+
+      .toggle-form a:hover::after {
+        width: 100%;
+      }
+
+      .toggle-form a:hover {
+        color: #764ba2;
+      }
+
+      /* Messages */
+      .error {
+        color: #ff6b6b;
+        font-size: 0.85em;
+        margin-top: 8px;
+        display: none;
+        animation: shake 0.3s ease;
+      }
+
+      @keyframes shake {
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+        25% {
+          transform: translateX(-10px);
+        }
+        75% {
+          transform: translateX(10px);
+        }
+      }
+
+      .success {
+        background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+        color: white;
+        padding: 16px;
+        border-radius: 12px;
+        margin-bottom: 25px;
+        display: none;
+        animation: slideDown 0.5s ease;
+        box-shadow: 0 10px 30px rgba(46, 204, 113, 0.4);
+      }
+
+      @keyframes slideDown {
+        from {
+          opacity: 0;
+          transform: translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      #signupForm {
+        display: none;
+      }
+
+      /* Responsive */
+      @media (max-width: 480px) {
+        .container {
+          padding: 35px 25px;
+        }
+        .logo h1 {
+          font-size: 1.8em;
+        }
+        .earth-container {
+          right: -150px;
+          opacity: 0.2;
+        }
+      }
+
+      /* Loading Animation */
+      .loading {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: white;
+        animation: spin 0.8s linear infinite;
+        margin-left: 10px;
+        vertical-align: middle;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Space Background -->
+    <div class="space-background"></div>
+
+    <!-- Stars -->
+    <div class="stars" id="stars"></div>
+
+    <!-- Rotating Earth -->
+    <div class="earth-container">
+      <div class="section-banner"></div>
+    </div>
+
+    <div class="container">
+      <div class="logo">
+        <div class="logo-image">
+          <img src="logo.jpeg" alt="GlobeTrotter Logo" />
+        </div>
+        <h1>GlobeTrotter</h1>
+        <p>Empowering Personalized Travel Planning</p>
+      </div>
+
+      <div class="success" id="successMsg"></div>
+
+      <!-- Login Form -->
+      <form id="loginForm">
+        <div class="form-group">
+          <label for="loginEmail">Email Address</label>
+          <div class="input-wrapper">
+            <input
+              type="email"
+              id="loginEmail"
+              placeholder="Enter your email"
+              required
+            />
+            <div class="input-icon">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path
+                  d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
+                />
+              </svg>
+            </div>
+          </div>
+          <div class="error" id="loginEmailError"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="loginPassword">Password</label>
+          <div class="input-wrapper">
+            <input
+              type="password"
+              id="loginPassword"
+              placeholder="Enter your password"
+              required
+            />
+            <div class="input-icon">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path
+                  d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
+                />
+              </svg>
+            </div>
+          </div>
+          <div class="error" id="loginPasswordError"></div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          <span>Sign In</span>
+        </button>
+
+        <div class="toggle-form">
+          Don't have an account? <a href="#" id="showSignup">Create Account</a>
+        </div>
+      </form>
+
+      <!-- Signup Form -->
+      <form id="signupForm">
+        <div class="form-group">
+          <label for="signupName">Full Name</label>
+          <div class="input-wrapper">
+            <input
+              type="text"
+              id="signupName"
+              placeholder="Enter your full name"
+              required
+            />
+            <div class="input-icon">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path
+                  d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"
+                />
+              </svg>
+            </div>
+          </div>
+          <div class="error" id="signupNameError"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="signupEmail">Email Address</label>
+          <div class="input-wrapper">
+            <input
+              type="email"
+              id="signupEmail"
+              placeholder="Enter your email"
+              required
+            />
+            <div class="input-icon">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path
+                  d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"
+                />
+              </svg>
+            </div>
+          </div>
+          <div class="error" id="signupEmailError"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="signupPassword">Password</label>
+          <div class="input-wrapper">
+            <input
+              type="password"
+              id="signupPassword"
+              placeholder="Create a strong password"
+              required
+            />
+            <div class="input-icon">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <path
+                  d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"
+                />
+              </svg>
+            </div>
+          </div>
+          <div class="error" id="signupPasswordError"></div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+          <span>Create Account</span>
+        </button>
+
+        <div class="toggle-form">
+          Already have an account? <a href="#" id="showLogin">Sign In</a>
+        </div>
+      </form>
+    </div>
+
+    <script>
+      // Initialize localStorage
+      if (!localStorage.getItem("users")) {
+        localStorage.setItem("users", JSON.stringify([]));
+      }
+
+      // Create stars
+      function createStars() {
+        const starsContainer = document.getElementById("stars");
+        for (let i = 0; i < 150; i++) {
+          const star = document.createElement("div");
+          star.className = "star";
+          star.style.left = Math.random() * 100 + "%";
+          star.style.top = Math.random() * 100 + "%";
+          star.style.animationDelay = Math.random() * 3 + "s";
+          star.style.animationDuration = Math.random() * 2 + 2 + "s";
+          starsContainer.appendChild(star);
+        }
+      }
+      createStars();
+
+      // Toggle between forms
+      document.getElementById("showSignup").addEventListener("click", (e) => {
+        e.preventDefault();
+        document.getElementById("loginForm").style.display = "none";
+        document.getElementById("signupForm").style.display = "block";
+        clearAllErrors();
+      });
+
+      document.getElementById("showLogin").addEventListener("click", (e) => {
+        e.preventDefault();
+        document.getElementById("signupForm").style.display = "none";
+        document.getElementById("loginForm").style.display = "block";
+        clearAllErrors();
+      });
+
+      // Signup
+      document
+        .getElementById("signupForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const button = e.target.querySelector(".btn");
+          const buttonText = button.querySelector("span");
+          const originalText = buttonText.textContent;
+
+          const name = document.getElementById("signupName").value.trim();
+          const email = document.getElementById("signupEmail").value.trim();
+          const password = document.getElementById("signupPassword").value;
+
+          clearAllErrors();
+          let isValid = true;
+
+          if (name.length < 2) {
+            showError("signupNameError", "Name must be at least 2 characters");
+            isValid = false;
+          }
+
+          if (!email.includes("@") || !email.includes(".")) {
+            showError("signupEmailError", "Please enter a valid email address");
+            isValid = false;
+          }
+
+          if (password.length < 6) {
+            showError(
+              "signupPasswordError",
+              "Password must be at least 6 characters"
+            );
+            isValid = false;
+          }
+
+          if (!isValid) return;
+
+          buttonText.innerHTML =
+            'Creating Account <span class="loading"></span>';
+          button.disabled = true;
+
+          // Simulate API delay
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
+          const users = JSON.parse(localStorage.getItem("users"));
+          const existingUser = users.find((u) => u.email === email);
+
+          if (existingUser) {
+            showError("signupEmailError", "This email is already registered");
+            buttonText.textContent = originalText;
+            button.disabled = false;
+            return;
+          }
+
+          const newUser = {
+            id: "user_" + Date.now(),
+            name: name,
+            email: email,
+            password: password,
+            createdAt: new Date().toISOString(),
+          };
+
+          users.push(newUser);
+          localStorage.setItem("users", JSON.stringify(users));
+          localStorage.setItem("currentUser", JSON.stringify(newUser));
+
+          showSuccess(
+            "Account created successfully! Redirecting to dashboard..."
+          );
+          setTimeout(() => {
+            window.location.href = "dashboard.html";
+          }, 1500);
+        });
+
+      // Login
+      document
+        .getElementById("loginForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+
+          const button = e.target.querySelector(".btn");
+          const buttonText = button.querySelector("span");
+          const originalText = buttonText.textContent;
+
+          const email = document.getElementById("loginEmail").value.trim();
+          const password = document.getElementById("loginPassword").value;
+
+          clearAllErrors();
+
+          if (!email.includes("@") || !email.includes(".")) {
+            showError("loginEmailError", "Please enter a valid email address");
+            return;
+          }
+
+          if (password.length < 6) {
+            showError(
+              "loginPasswordError",
+              "Password must be at least 6 characters"
+            );
+            return;
+          }
+
+          buttonText.innerHTML = 'Signing In <span class="loading"></span>';
+          button.disabled = true;
+
+          // Simulate API delay
+          await new Promise((resolve) => setTimeout(resolve, 1000));
+
+          const users = JSON.parse(localStorage.getItem("users"));
+          const user = users.find(
+            (u) => u.email === email && u.password === password
+          );
+
+          if (!user) {
+            showError("loginPasswordError", "Invalid email or password");
+            buttonText.textContent = originalText;
+            button.disabled = false;
+            return;
+          }
+
+          localStorage.setItem("currentUser", JSON.stringify(user));
+          showSuccess("Login successful! Redirecting to dashboard...");
+          setTimeout(() => {
+            window.location.href = "dashboard.html";
+          }, 1500);
+        });
+
+      // Helper functions
+      function showError(elementId, message) {
+        const errorElement = document.getElementById(elementId);
+        errorElement.textContent = message;
+        errorElement.style.display = "block";
+      }
+
+      function showSuccess(message) {
+        const successElement = document.getElementById("successMsg");
+        successElement.textContent = message;
+        successElement.style.display = "block";
+      }
+
+      function clearAllErrors() {
+        document.querySelectorAll(".error").forEach((err) => {
+          err.style.display = "none";
+        });
+        document.getElementById("successMsg").style.display = "none";
+      }
+
+      // Clear errors on input
+      document.querySelectorAll("input").forEach((input) => {
+        input.addEventListener("input", () => {
+          const errorId = input.id + "Error";
+          const errorElement = document.getElementById(errorId);
+          if (errorElement) {
+            errorElement.style.display = "none";
+          }
+        });
+      });
+
+      // Add input focus effects
+      document.querySelectorAll("input").forEach((input) => {
+        input.addEventListener("focus", function () {
+          this.parentElement.style.transform = "scale(1.02)";
+        });
+
+        input.addEventListener("blur", function () {
+          this.parentElement.style.transform = "scale(1)";
+        });
+      });
+    </script>
+  </body>
+</html>

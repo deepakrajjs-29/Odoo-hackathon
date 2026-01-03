@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Itinerary Builder - GlobeTrotter</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a1a;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .space-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #000000 0%, #0a0a2e 50%, #16213e 100%);
+            z-index: 0;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkling 3s infinite;
+        }
+
+        @keyframes twinkling {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .logo img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 8px 16px;
+            border-radius: 8px;
+        }
+
+        .nav-links a:hover {
+            color: white;
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 10;
+        }
+
+        .page-header {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: slideDown 0.6s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .page-header p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.1rem;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 2rem;
+        }
+
+        .stops-section {
+            animation: fadeInLeft 0.8s ease;
+        }
+
+        @keyframes fadeInLeft {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .add-stop-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            margin-bottom: 2rem;
+        }
+
+        .add-stop-card h2 {
+            color: white;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+        }
+
+        .form-group input::placeholder {
+            color: rgba(255, 255, 255, 0.4);
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+        }
+
+        .btn {
+            padding: 0.8rem 2rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-small {
+            padding: 0.5rem 1rem;
+            font-size: 0.9rem;
+        }
+
+        .stops-list {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .stop-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            position: relative;
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .stop-card:hover {
+            transform: translateX(10px);
+            box-shadow: 0 25px 70px rgba(102, 126, 234, 0.3);
+        }
+
+        .stop-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 5px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px 0 0 20px;
+        }
+
+        .stop-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .stop-info h3 {
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 0.3rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stop-dates {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.95rem;
+        }
+
+        .stop-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .icon-btn {
+            width: 35px;
+            height: 35px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .icon-btn:hover {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .btn-move-up {
+            background: rgba(25, 118, 210, 0.2);
+            color: #1976d2;
+            border: 1px solid rgba(25, 118, 210, 0.3);
+        }
+
+        .btn-move-down {
+            background: rgba(245, 124, 0, 0.2);
+            color: #f57c00;
+            border: 1px solid rgba(245, 124, 0, 0.3);
+        }
+
+        .btn-delete-stop {
+            background: rgba(211, 47, 47, 0.2);
+            color: #d32f2f;
+            border: 1px solid rgba(211, 47, 47, 0.3);
+        }
+
+        .activities-section {
+            margin-top: 1.5rem;
+        }
+
+        .activities-section h4 {
+            color: white;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .activity-form {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 1rem;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .activity-form-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 0.7rem;
+            align-items: end;
+        }
+
+        .activities-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+        }
+
+        .activity-item {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0.8rem 1rem;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .activity-item:hover {
+            background: rgba(102, 126, 234, 0.2);
+            transform: translateX(5px);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+
+        .activity-info {
+            flex: 1;
+        }
+
+        .activity-name {
+            font-weight: 600;
+            color: white;
+            margin-bottom: 0.2rem;
+        }
+
+        .activity-details {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .sidebar {
+            animation: fadeInRight 0.8s ease;
+        }
+
+        @keyframes fadeInRight {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .sidebar-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1.5rem;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            margin-bottom: 1.5rem;
+        }
+
+        .sidebar-card h3 {
+            color: white;
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .summary-item {
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .summary-item:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.5);
+        }
+
+        .summary-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 0.3rem;
+        }
+
+        .summary-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        .save-btn-container {
+            position: sticky;
+            bottom: 20px;
+        }
+
+        .btn-save {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .empty-stops {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .empty-stops-icon {
+            font-size: 5rem;
+            margin-bottom: 1.5rem;
+            opacity: 0.5;
+            animation: bounce 2s infinite;
+            filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.6));
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .empty-stops h3 {
+            color: white;
+            margin-bottom: 0.5rem;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
+            .activity-form-row { grid-template-columns: 1fr; }
+            .nav-links { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="space-background"></div>
+    <div class="stars" id="stars"></div>
+
+    <header>
+        <nav>
+            <a href="dashboard.html" class="logo">
+                <img src="logo.jpeg" alt="GlobeTrotter">
+                GlobeTrotter
+            </a>
+            <div class="nav-links">
+                <a href="dashboard.html">Home</a>
+                <a href="my-trips.html">My Trips</a>
+                <a href="city-search.html">Explore</a>
+                <a href="profile.html">Profile</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="page-header">
+            <h1 id="tripTitle">My Epic Journey</h1>
+            <p id="tripDates">Jan 15, 2026 - Jan 25, 2026</p>
+        </div>
+
+        <div class="main-content">
+            <div class="stops-section">
+                <div class="add-stop-card">
+                    <h2>🏙️ Add City Stop</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>City Name</label>
+                            <input type="text" id="cityName" placeholder="e.g., Paris">
+                        </div>
+                        <div class="form-group">
+                            <label>From Date</label>
+                            <input type="date" id="fromDate">
+                        </div>
+                        <div class="form-group">
+                            <label>To Date</label>
+                            <input type="date" id="toDate">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary" onclick="addStop()">+ Add Stop</button>
+                </div>
+
+                <div class="stops-list" id="stopsList"></div>
+            </div>
+
+            <div class="sidebar">
+                <div class="sidebar-card">
+                    <h3>📊 Trip Summary</h3>
+                    <div class="summary-item">
+                        <div class="summary-label">Total Cities</div>
+                        <div class="summary-value" id="totalCities">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Total Activities</div>
+                        <div class="summary-value" id="totalActivities">0</div>
+                    </div>
+                    <div class="summary-item">
+                        <div class="summary-label">Estimated Cost</div>
+                        <div class="summary-value" id="estimatedCost">$0</div>
+                    </div>
+                </div>
+
+                <div class="save-btn-container">
+                    <button class="btn btn-primary btn-save" onclick="saveAndContinue()">Save & Continue →</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function createStars() {
+            const c = document.getElementById('stars');
+            for (let i = 0; i < 150; i++) {
+                const s = document.createElement('div');
+                s.className = 'star';
+                s.style.left = Math.random() * 100 + '%';
+                s.style.top = Math.random() * 100 + '%';
+                s.style.animationDelay = Math.random() * 3 + 's';
+                s.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                c.appendChild(s);
+            }
+        }
+        createStars();
+
+        let stops = [];
+        let activities = [];
+
+        function addStop() {
+            const city = document.getElementById('cityName').value.trim();
+            const from = document.getElementById('fromDate').value;
+            const to = document.getElementById('toDate').value;
+
+            if (!city || !from || !to) {
+                alert('Please fill in all fields');
+                return;
+            }
+
+            if (new Date(from) > new Date(to)) {
+                alert('End date must be after start date');
+                return;
+            }
+
+            stops.push({
+                id: 'stop_' + Date.now(),
+                city,
+                fromDate: from,
+                toDate: to,
+                order: stops.length
+            });
+
+            document.getElementById('cityName').value = '';
+            document.getElementById('fromDate').value = '';
+            document.getElementById('toDate').value = '';
+
+            loadStops();
+        }
+
+        function loadStops() {
+            const list = document.getElementById('stopsList');
+
+            if (stops.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-stops">
+                        <div class="empty-stops-icon">🗺️</div>
+                        <h3>No stops added yet</h3>
+                        <p>Add your first destination above!</p>
+                    </div>
+                `;
+                updateSummary();
+                return;
+            }
+
+            list.innerHTML = stops.map((stop, idx) => {
+                const stopActivities = activities.filter(a => a.stopId === stop.id);
+                return `
+                    <div class="stop-card">
+                        <div class="stop-header">
+                            <div class="stop-info">
+                                <h3>🏙️ ${stop.city}</h3>
+                                <p class="stop-dates">📅 ${formatDate(stop.fromDate)} - ${formatDate(stop.toDate)}</p>
+                            </div>
+                            <div class="stop-actions">
+                                ${idx > 0 ? `<button class="icon-btn btn-move-up" onclick="moveStop('${stop.id}', 'up')">↑</button>` : ''}
+                                ${idx < stops.length - 1 ? `<button class="icon-btn btn-move-down" onclick="moveStop('${stop.id}', 'down')">↓</button>` : ''}
+                                <button class="icon-btn btn-delete-stop" onclick="deleteStop('${stop.id}')">🗑️</button>
+                            </div>
+                        </div>
+                        
+                        <div class="activities-section">
+                            <h4>🎯 Activities</h4>
+                            <div class="activity-form">
+                                <div class="activity-form-row">
+                                    <div class="form-group">
+                                        <input type="text" id="actName_${stop.id}" placeholder="Activity name">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="number" id="actCost_${stop.id}" placeholder="Cost ($)">
+                                    </div>
+                                    <div class="form-group">
+                                        <input type="number" id="actDur_${stop.id}" placeholder="Hours">
+                                    </div>
+                                    <button class="btn btn-primary btn-small" onclick="addActivity('${stop.id}')">+</button>
+                                </div>
+                            </div>
+                            <div class="activities-list">
+                                ${stopActivities.map(act => `
+                                    <div class="activity-item">
+                                        <div class="activity-info">
+                                            <div class="activity-name">${act.name}</div>
+                                            <div class="activity-details">💰 $${act.cost} • ⏱️ ${act.duration}h</div>
+                                        </div>
+                                        <button class="icon-btn btn-delete-stop" onclick="deleteActivity('${act.id}')">🗑️</button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            updateSummary();
+        }
+
+        function addActivity(stopId) {
+            const name = document.getElementById(`actName_${stopId}`).value.trim();
+            const cost = parseFloat(document.getElementById(`actCost_${stopId}`).value) || 0;
+            const duration = parseFloat(document.getElementById(`actDur_${stopId}`).value) || 0;
+
+            if (!name) {
+                alert('Please enter activity name');
+                return;
+            }
+
+            activities.push({
+                id: 'act_' + Date.now(),
+                stopId,
+                name,
+                cost,
+                duration
+            });
+
+            loadStops();
+        }
+
+        function deleteActivity(actId) {
+            activities = activities.filter(a => a.id !== actId);
+            loadStops();
+        }
+
+        function moveStop(stopId, dir) {
+            const idx = stops.findIndex(s => s.id === stopId);
+            if (dir === 'up' && idx > 0) {
+                [stops[idx], stops[idx - 1]] = [stops[idx - 1], stops[idx]];
+            } else if (dir === 'down' && idx < stops.length - 1) {
+                [stops[idx], stops[idx + 1]] = [stops[idx + 1], stops[idx]];
+            }
+            loadStops();
+        }
+
+        function deleteStop(stopId) {
+            if (!confirm('Delete this stop and all activities?')) return;
+            stops = stops.filter(s => s.id !== stopId);
+            activities = activities.filter(a => a.stopId !== stopId);
+            loadStops();
+        }
+
+        function updateSummary() {
+            const total = activities.reduce((sum, a) => sum + (a.cost || 0), 0);
+            document.getElementById('totalCities').textContent = stops.length;
+            document.getElementById('totalActivities').textContent = activities.length;
+            document.getElementById('estimatedCost').textContent = '$' + total.toLocaleString();
+        }
+
+        function saveAndContinue() {
+            alert('Itinerary saved successfully!');
+        }
+
+        function formatDate(d) {
+            const date = new Date(d);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        loadStops();
+    </script>
+</body>
+</html>

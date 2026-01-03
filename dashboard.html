@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GlobeTrotter - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0a0a1a;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Space Background */
+        .space-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #000000 0%, #0a0a2e 50%, #16213e 100%);
+            z-index: 0;
+        }
+
+        /* Stars */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            border-radius: 50%;
+            animation: twinkling 3s infinite;
+        }
+
+        @keyframes twinkling {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
+        }
+
+        /* Navigation */
+        nav {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            padding: 20px 0;
+            box-shadow: 0 5px 30px rgba(0, 0, 0, 0.5);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); }
+            to { transform: translateY(0); }
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-brand {
+            font-size: 1.8em;
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .nav-brand img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .nav-brand:hover {
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 1px solid transparent;
+        }
+
+        .nav-links a:hover {
+            background: rgba(102, 126, 234, 0.2);
+            border-color: rgba(102, 126, 234, 0.5);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Hero Section */
+        .hero {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            padding: 60px 50px;
+            border-radius: 20px;
+            margin-bottom: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            animation: fadeIn 0.8s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(102, 126, 234, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero h1 {
+            font-size: 2.5em;
+            color: white;
+            margin-bottom: 15px;
+            text-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .hero h1 span {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.2em;
+            margin-bottom: 30px;
+        }
+
+        .btn {
+            padding: 16px 40px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.05em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            text-decoration: none;
+            display: inline-block;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 400px;
+            height: 400px;
+        }
+
+        /* Section Titles */
+        .section-title {
+            font-size: 2em;
+            color: white;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-shadow: 0 0 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .section-title svg {
+            width: 30px;
+            height: 30px;
+            fill: #667eea;
+            filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.6));
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            padding: 30px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+
+        .card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .card-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            filter: drop-shadow(0 0 10px rgba(102, 126, 234, 0.5));
+        }
+
+        .card h3 {
+            color: white;
+            margin-bottom: 10px;
+            font-size: 1.5em;
+        }
+
+        .card p {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.6;
+        }
+
+        .card-date {
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+
+        /* Recommended Destinations */
+        .destinations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 50px;
+        }
+
+        .destination-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            transition: all 0.4s ease;
+            cursor: pointer;
+        }
+
+        .destination-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 60px rgba(102, 126, 234, 0.4);
+            border-color: rgba(102, 126, 234, 0.5);
+        }
+
+        .destination-img {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4em;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .destination-img::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.3) 50%, transparent 70%);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .destination-info {
+            padding: 20px;
+        }
+
+        .destination-info h4 {
+            color: white;
+            margin-bottom: 8px;
+            font-size: 1.3em;
+        }
+
+        .destination-info p {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.95em;
+        }
+
+        .destination-rating {
+            color: #ffa500;
+            margin-top: 10px;
+            filter: drop-shadow(0 0 5px rgba(255, 165, 0, 0.5));
+        }
+
+        /* Budget Highlights */
+        .budget-summary {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            padding: 40px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+        }
+
+        .budget-item {
+            text-align: center;
+            padding: 25px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.4s ease;
+        }
+
+        .budget-item:hover {
+            transform: scale(1.05) translateY(-5px);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-color: transparent;
+            box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+        }
+
+        .budget-label {
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.6);
+            margin-bottom: 10px;
+        }
+
+        .budget-item:hover .budget-label {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .budget-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            text-shadow: 0 0 10px rgba(102, 126, 234, 0.5);
+        }
+
+        .budget-item:hover .budget-value {
+            color: white;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .empty-state-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+            opacity: 0.5;
+            filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.3));
+        }
+
+        .empty-state h3 {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                gap: 8px;
+            }
+            .nav-links a {
+                font-size: 0.85em;
+                padding: 8px 12px;
+            }
+            .hero {
+                padding: 40px 30px;
+            }
+            .hero h1 {
+                font-size: 1.8em;
+            }
+            .section-title {
+                font-size: 1.5em;
+            }
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+            .nav-brand {
+                font-size: 1.3em;
+            }
+            .nav-brand img {
+                width: 30px;
+                height: 30px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Space Background -->
+    <div class="space-background"></div>
+    
+    <!-- Stars -->
+    <div class="stars" id="stars"></div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="dashboard.html" class="nav-brand">
+                <img src="logo.jpeg" alt="GlobeTrotter">
+                GlobeTrotter
+            </a>
+            <div class="nav-links">
+                <a href="dashboard.html">Home</a>
+                <a href="my-trips.html">My Trips</a>
+                <a href="city-search.html">Explore</a>
+                <a href="profile.html">Profile</a>
+                <a href="#" id="logoutBtn">Logout</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Hero Section -->
+        <div class="hero">
+            <div class="hero-content">
+                <h1>Welcome back, <span id="userName">Traveler</span>!</h1>
+                <p>Ready to plan your next adventure? Let's make it unforgettable!</p>
+                <a href="create-trip.html" class="btn btn-primary">
+                    <span>+ Plan New Trip</span>
+                </a>
+            </div>
+        </div>
+
+        <!-- Recent Trips -->
+        <h2 class="section-title">
+            <svg viewBox="0 0 24 24">
+                <path d="M20 6h-3V4c0-1.11-.89-2-2-2H9c-1.11 0-2 .89-2 2v2H4c-1.11 0-2 .89-2 2v11c0 1.11.89 2 2 2h16c1.11 0 2-.89 2-2V8c0-1.11-.89-2-2-2zM9 4h6v2H9V4zm11 15H4v-2h16v2zm0-5H4V8h3v1h2V8h6v1h2V8h3v6z"/>
+            </svg>
+            Your Recent Trips
+        </h2>
+        <div class="cards-grid" id="recentTrips">
+            <!-- Will be populated by JavaScript -->
+        </div>
+
+        <!-- Recommended Destinations -->
+        <h2 class="section-title">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
+            </svg>
+            Recommended Destinations
+        </h2>
+        <div class="destinations-grid" id="recommendedDestinations">
+            <!-- Will be populated by JavaScript -->
+        </div>
+
+        <!-- Budget Summary -->
+        <h2 class="section-title">
+            <svg viewBox="0 0 24 24">
+                <path d="M11.8 10.9c-2.27-.59-3-1.2-3-2.15 0-1.09 1.01-1.85 2.7-1.85 1.78 0 2.44.85 2.5 2.1h2.21c-.07-1.72-1.12-3.3-3.21-3.81V3h-3v2.16c-1.94.42-3.5 1.68-3.5 3.61 0 2.31 1.91 3.46 4.7 4.13 2.5.6 3 1.48 3 2.41 0 .69-.49 1.79-2.7 1.79-2.06 0-2.87-.92-2.98-2.1h-2.2c.12 2.19 1.76 3.42 3.68 3.83V21h3v-2.15c1.95-.37 3.5-1.5 3.5-3.55 0-2.84-2.43-3.81-4.7-4.4z"/>
+            </svg>
+            Budget Overview
+        </h2>
+        <div class="budget-summary">
+            <div class="budget-item">
+                <div class="budget-label">Total Budget</div>
+                <div class="budget-value" id="totalBudget">$0</div>
+            </div>
+            <div class="budget-item">
+                <div class="budget-label">Total Spent</div>
+                <div class="budget-value" id="totalSpent">$0</div>
+            </div>
+            <div class="budget-item">
+                <div class="budget-label">Upcoming Trips</div>
+                <div class="budget-value" id="upcomingTrips">0</div>
+            </div>
+            <div class="budget-item">
+                <div class="budget-label">Destinations Visited</div>
+                <div class="budget-value" id="destinationsCount">0</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create stars
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 150; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.animationDelay = Math.random() * 3 + 's';
+                star.style.animationDuration = (Math.random() * 2 + 2) + 's';
+                starsContainer.appendChild(star);
+            }
+        }
+        createStars();
+
+        // Check authentication
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser) {
+            window.location.href = 'index.html';
+        }
+
+        // Initialize data structures
+        if (!localStorage.getItem('trips')) {
+            localStorage.setItem('trips', JSON.stringify([]));
+        }
+        if (!localStorage.getItem('stops')) {
+            localStorage.setItem('stops', JSON.stringify([]));
+        }
+        if (!localStorage.getItem('activities')) {
+            localStorage.setItem('activities', JSON.stringify([]));
+        }
+        if (!localStorage.getItem('budgets')) {
+            localStorage.setItem('budgets', JSON.stringify([]));
+        }
+
+        // Display user name
+        document.getElementById('userName').textContent = currentUser.name;
+
+        // Logout functionality
+        document.getElementById('logoutBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('currentUser');
+                window.location.href = 'index.html';
+            }
+        });
+
+        // Load recent trips
+        function loadRecentTrips() {
+            const trips = JSON.parse(localStorage.getItem('trips'));
+            const userTrips = trips.filter(t => t.userId === currentUser.id)
+                                   .sort((a, b) => new Date(b.startDate) - new Date(a.startDate))
+                                   .slice(0, 3);
+
+            const recentTripsContainer = document.getElementById('recentTrips');
+
+            if (userTrips.length === 0) {
+                recentTripsContainer.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <div class="empty-state-icon">✈️</div>
+                        <h3>No trips yet</h3>
+                        <p>Start planning your first adventure!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            recentTripsContainer.innerHTML = userTrips.map(trip => `
+                <div class="card" onclick="window.location.href='itinerary-view.html?id=${trip.id}'">
+                    <div class="card-icon">🗺️</div>
+                    <h3>${trip.name}</h3>
+                    <p>${trip.description || 'No description'}</p>
+                    <p class="card-date">📅 ${formatDate(trip.startDate)} - ${formatDate(trip.endDate)}</p>
+                </div>
+            `).join('');
+        }
+
+        // Load recommended destinations
+        function loadRecommendedDestinations() {
+            const destinations = [
+                { name: 'Paris', country: 'France', icon: '🗼', rating: 4.8 },
+                { name: 'Tokyo', country: 'Japan', icon: '🗾', rating: 4.9 },
+                { name: 'New York', country: 'USA', icon: '🗽', rating: 4.7 },
+                { name: 'Rome', country: 'Italy', icon: '🏛️', rating: 4.8 },
+                { name: 'Barcelona', country: 'Spain', icon: '🏖️', rating: 4.7 },
+                { name: 'Dubai', country: 'UAE', icon: '🏙️', rating: 4.8 }
+            ];
+
+            const destinationsContainer = document.getElementById('recommendedDestinations');
+            destinationsContainer.innerHTML = destinations.map(dest => `
+                <div class="destination-card">
+                    <div class="destination-img">${dest.icon}</div>
+                    <div class="destination-info">
+                        <h4>${dest.name}</h4>
+                        <p>${dest.country}</p>
+                        <div class="destination-rating">
+                            ${'⭐'.repeat(Math.floor(dest.rating))} ${dest.rating}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Calculate budget summary
+        function calculateBudgetSummary() {
+            const trips = JSON.parse(localStorage.getItem('trips'));
+            const budgets = JSON.parse(localStorage.getItem('budgets'));
+            const stops = JSON.parse(localStorage.getItem('stops'));
+            
+            const userTrips = trips.filter(t => t.userId === currentUser.id);
+            
+            let totalBudget = 0;
+            let totalSpent = 0;
+            
+            userTrips.forEach(trip => {
+                const tripBudgets = budgets.filter(b => b.tripId === trip.id);
+                tripBudgets.forEach(budget => {
+                    const budgetTotal = (budget.transport || 0) + (budget.stay || 0) + 
+                                       (budget.food || 0) + (budget.activities || 0);
+                    totalBudget += budgetTotal;
+                    totalSpent += budgetTotal * 0.7; // Mock spent amount
+                });
+            });
+
+            const upcomingTrips = userTrips.filter(t => new Date(t.startDate) > new Date()).length;
+            
+            // Count unique destinations
+            const allStops = stops.filter(s => {
+                return userTrips.some(t => t.id === s.tripId);
+            });
+            const uniqueCities = [...new Set(allStops.map(s => s.city))];
+
+            document.getElementById('totalBudget').textContent = '$' + totalBudget.toLocaleString();
+            document.getElementById('totalSpent').textContent = '$' + Math.round(totalSpent).toLocaleString();
+            document.getElementById('upcomingTrips').textContent = upcomingTrips;
+            document.getElementById('destinationsCount').textContent = uniqueCities.length;
+        }
+
+        // Helper function to format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        // Load all data
+        loadRecentTrips();
+        loadRecommendedDestinations();
+        calculateBudgetSummary();
+    </script>
+</body>
+</html>

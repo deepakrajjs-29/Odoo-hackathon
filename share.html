@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shared Itinerary - GlobeTrotter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            animation: float 15s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { transform: translateY(-100vh) translateX(100px); opacity: 0; }
+        }
+
+        /* Header */
+        .share-header {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+            text-align: center;
+            position: relative;
+            z-index: 100;
+            animation: slideDown 0.5s ease;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .share-logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.5rem;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .share-subtitle {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem 4rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Trip Header Card */
+        .trip-header-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            padding: 3rem;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            margin-bottom: 2rem;
+            animation: fadeIn 0.8s ease;
+            text-align: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .trip-emoji {
+            font-size: 5rem;
+            margin-bottom: 1rem;
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .trip-title {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .trip-meta {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin: 2rem 0;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .meta-icon {
+            font-size: 2rem;
+        }
+
+        .meta-label {
+            color: #999;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .meta-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .share-actions {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .share-btn {
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 15px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .share-btn.primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .share-btn.secondary {
+            background: white;
+            border: 2px solid #667eea;
+            color: #667eea;
+        }
+
+        .share-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Itinerary Section */
+        .itinerary-section {
+            animation: slideUp 1s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .day-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 2.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.6s ease;
+            animation-fill-mode: both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .day-card:nth-child(1) { animation-delay: 0.1s; }
+        .day-card:nth-child(2) { animation-delay: 0.2s; }
+        .day-card:nth-child(3) { animation-delay: 0.3s; }
+        .day-card:nth-child(4) { animation-delay: 0.4s; }
+        .day-card:nth-child(5) { animation-delay: 0.5s; }
+
+        .day-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .day-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 3px solid #f0f0f0;
+        }
+
+        .day-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .day-date {
+            font-size: 1.2rem;
+            color: #666;
+        }
+
+        .activities-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .activity-item {
+            display: flex;
+            gap: 2rem;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+
+        .activity-item:hover {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            transform: translateX(10px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .activity-time {
+            min-width: 100px;
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+
+        .activity-details {
+            flex: 1;
+        }
+
+        .activity-name {
+            font-size: 1.3rem;
+            margin-bottom: 0.5rem;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .activity-location {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #999;
+            margin-bottom: 0.5rem;
+        }
+
+        .activity-location::before {
+            content: '📍';
+        }
+
+        .activity-description {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        /* Footer */
+        .share-footer {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 3rem;
+            text-align: center;
+            margin-top: 3rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 1.5s ease;
+        }
+
+        .footer-title {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .footer-description {
+            color: #666;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .cta-btn {
+            padding: 1.2rem 3rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Success Message */
+        .success-message {
+            position: fixed;
+            top: 100px;
+            right: 2rem;
+            background: white;
+            padding: 1.5rem 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: none;
+            align-items: center;
+            gap: 1rem;
+            z-index: 1000;
+            animation: slideInRight 0.3s ease;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .success-message.show {
+            display: flex;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .trip-title {
+                font-size: 2rem;
+            }
+
+            .trip-meta {
+                gap: 1.5rem;
+            }
+
+            .share-actions {
+                flex-direction: column;
+            }
+
+            .day-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .activity-item {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .activity-time {
+                min-width: auto;
+            }
+
+            .success-message {
+                right: 1rem;
+                left: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Success Message -->
+    <div class="success-message" id="successMessage">
+        <span style="font-size: 2rem;">✅</span>
+        <span id="successText">Link copied to clipboard!</span>
+    </div>
+
+    <!-- Header -->
+    <div class="share-header">
+        <div class="share-logo">🌍 GlobeTrotter</div>
+        <div class="share-subtitle">Explore Amazing Journeys</div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <!-- Trip Header -->
+        <div class="trip-header-card">
+            <div class="trip-emoji">✈️</div>
+            <h1 class="trip-title">Magical Paris Adventure</h1>
+            
+            <div class="trip-meta">
+                <div class="meta-item">
+                    <div class="meta-icon">📅</div>
+                    <div class="meta-label">Duration</div>
+                    <div class="meta-value">5 Days</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-icon">📍</div>
+                    <div class="meta-label">Destination</div>
+                    <div class="meta-value">Paris, France</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-icon">💰</div>
+                    <div class="meta-label">Budget</div>
+                    <div class="meta-value">$5,000</div>
+                </div>
+                <div class="meta-item">
+                    <div class="meta-icon">👥</div>
+                    <div class="meta-label">Travelers</div>
+                    <div class="meta-value">2 Adults</div>
+                </div>
+            </div>
+
+            <div class="share-actions">
+                <button class="share-btn primary" onclick="copyLink()">
+                    🔗 Copy Link
+                </button>
+                <button class="share-btn secondary" onclick="downloadItinerary()">
+                    📥 Download PDF
+                </button>
+                <button class="share-btn secondary" onclick="shareOnSocial()">
+                    📱 Share
+                </button>
+            </div>
+        </div>
+
+        <!-- Itinerary -->
+        <div class="itinerary-section">
+            <!-- Day 1 -->
+            <div class="day-card">
+                <div class="day-header">
+                    <div class="day-number">Day 1</div>
+                    <div class="day-date">Friday, March 15, 2024</div>
+                </div>
+                <div class="activities-list">
+                    <div class="activity-item">
+                        <div class="activity-time">10:00 AM</div>
+                        <div class="activity-details">
+                            <div class="activity-name">Arrive in Paris ✈️</div>
+                            <div class="activity-location">Charles de Gaulle Airport</div>
+                            <div class="activity-description">
+                                Flight arrival and transfer to Hotel Le Marais in the city center. Check-in and freshen up before starting the adventure.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-time">2:00 PM</div>
+                        <div class="activity-details">
+                            <div class="activity-name">Lunch at Le Marais 🍽️</div>
+                            <div class="activity-location">Le Marais District</div>
+                            <div class="activity-description">
+                                Explore the charming cobblestone streets and enjoy traditional French cuisine at a local bistro. Try the authentic croissants and café au lait.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-time">5:00 PM</div>
+                        <div class="activity-details">
+                            <div class="activity-name">Eiffel Tower Sunset 🗼</div>
+                            <div class="activity-location">Eiffel Tower, Champ de Mars</div>
+                            <div class="activity-description">
+                                Skip-the-line access to the Eiffel Tower. Watch the magical sunset from the top and see the city lights come alive. Perfect photo opportunity!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 2 -->
+            <div class="day-card">
+                <div class="day-header">
+                    <div class="day-number">Day 2</div>
+                    <div class="day-date">Saturday, March 16, 2024</div>
+                </div>
+                <div class="activities-list">
+                    <div class="activity-item">
+                        <div class="activity-time">9:00 AM</div>
+                        <div class="activity-details">
+                            <div class="activity-name">Louvre Museum Tour 🎨</div>
+                            <div class="activity-location">Musée du Louvre</div>
+                            <div class="activity-description">
+                                Guided tour of the world's largest art museum. See famous masterpieces including the Mona Lisa, Venus de Milo, and Winged Victory of Samothrace.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-time">1:00 PM</div>
+                        <div class="activity-details">
+                            <div class="activity-name">Lunch at Café Marly ☕</div>
+                            <div class="activity-location">Louvre Museum Area</div>
+                            <div class="activity-description">
+                                Elegant lunch with a stunning view of the Louvre's iconic glass pyramid. Enjoy French pastries and wine.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-time">3:00 PM</div>
+                        <div class="activity-details">
+                            <div class="activity-name">Champs-Élysées Stroll 🛍️</div>
+                            <div class="activity-location">Champs-Élysées</div>
+                            <div class="activity-description">
+                                Walk down the famous avenue, do some luxury shopping, and visit the Arc de Triomphe. Don't miss Ladurée for macarons!
+                            </div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-time">7:00 PM</div>
+                        <div class="activity-details">
+                            <div class="activity-name">Seine River Dinner Cruise 🚢</div>
+                            <div class="activity-location">Seine River</div>
+                            <div class="activity-description">
+                                Romantic dinner cruise along the Seine with live music. Pass by illuminated landmarks including Notre-Dame, the Eiffel Tower, and more.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 3 -->
+            <div class="day-card">
+                <div class="day-header">
+                    <div class="day-number">Day 3</div>
+                    <div class="day-date">Sunday, March 17, 2024</div>
+                </div>
+                <div class="activities-list">
+                    <div class="activity-item">
+                        <div class="activity-time">9:00 AM</div>
+                        <div class="activity-details">
+                            <div class="activity-name">Palace of Versailles 👑</div>
+                            <div class="activity-location">Versailles</div>
+                            <div class="activity-description">
+                                Full day trip to the magnificent Palace of Versailles. Explore the opulent palace rooms, famous Hall of Mirrors, and the stunning French gardens. Royal experience!
+                            </div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-time">8:00 PM</div>
+                        <div class="activity-details">
+                            <div class="activity-name">Return to Paris 🌃</div>
+                            <div class="activity-location">Le Marais, Paris</div>
+                            <div class="activity-description">
+                                Return to Paris and enjoy a relaxed evening in Le Marais with dinner at a local French restaurant. Try the escargot and coq au vin!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 4 -->
+            <div class="day-card">
+                <div class="day-header">
+                    <div class="day-number">Day 4</div>
+                    <div class="day-date">Monday, March 18, 2024</div>
+                </div>
+                <div class="activities-list">
+                    <div class="activity-item">
+                        <div class="activity-time">10:00 AM</div>
+                        <div class="activity-details">
+                            <div class="activity-name">Montmartre Walking Tour 🎭</div>
+                            <div class="activity-location">Montmartre</div>
+                            <div class="activity-description">
+                                Explore the artistic bohemian neighborhood of Montmartre. Visit Sacré-Cœur Basilica, see street artists at Place du Tertre, and walk the charming streets.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-time">2:00 PM</div>
+                        <div class="activity-details">
+                            <div class="activity-name">Musée d'Orsay 🖼️</div>
+                            <div class="activity-location">Musée d'Orsay</div>
+                            <div class="activity-description">
+                                Admire the world's finest collection of Impressionist and Post-Impressionist masterpieces. See works by Monet, Renoir, Van Gogh, and more.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-time">7:00 PM</div>
+                        <div class="activity-details">
+                            <div class="activity-name">Farewell Dinner 🥂</div>
+                            <div class="activity-location">Latin Quarter</div>
+                            <div class="activity-description">
+                                Celebrate your last night in Paris with a gourmet French dinner in the historic Latin Quarter. Toast to an unforgettable journey!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Day 5 -->
+            <div class="day-card">
+                <div class="day-header">
+                    <div class="day-number">Day 5</div>
+                    <div class="day-date">Tuesday, March 19, 2024</div>
+                </div>
+                <div class="activities-list">
+                    <div class="activity-item">
+                        <div class="activity-time">10:00 AM</div>
+                        <div class="activity-details">
+                            <div class="activity-name">Check Out & Departure 🛫</div>
+                            <div class="activity-location">Hotel → CDG Airport</div>
+                            <div class="activity-description">
+                                Check out from Hotel Le Marais and transfer to Charles de Gaulle Airport. Au revoir, Paris! Until next time... 💙
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer CTA -->
+        <div class="share-footer">
+            <h2 class="footer-title">✨ Love this itinerary?</h2>
+            <p class="footer-description">
+                Create your own personalized travel plans with GlobeTrotter and explore the world your way!
+            </p>
+            <button class="cta-btn" onclick="window.location.href='index.html'">
+                🚀 Start Planning Your Trip
+            </button>
+        </div>
+    </div>
+
+    <script>
+        // Create animated particles
+        const particlesContainer = document.getElementById('particles');
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 15 + 's';
+            particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        // Show success message
+        function showSuccessMessage(message) {
+            const successMessage = document.getElementById('successMessage');
+            const successText = document.getElementById('successText');
+            successText.textContent = message;
+            successMessage.classList.add('show');
+            
+            setTimeout(() => {
+                successMessage.classList.remove('show');
+            }, 3000);
+        }
+
+        // Copy link to clipboard
+        function copyLink() {
+            const url = window.location.href;
+            navigator.clipboard.writeText(url).then(() => {
+                showSuccessMessage('🎉 Link copied to clipboard!');
+            }).catch(() => {
+                showSuccessMessage('📋 Link: ' + url);
+            });
+        }
+
+        // Download itinerary
+        function downloadItinerary() {
+            showSuccessMessage('📥 Preparing your PDF...');
+            setTimeout(() => {
+                alert('📥 PDF download feature coming soon!\n\nFor now, you can print this page (Ctrl+P / Cmd+P) and save as PDF.');
+                window.print();
+            }, 1000);
+        }
+
+        // Share on social media
+        function shareOnSocial() {
+            const shareData = {
+                title: 'My Paris Adventure Itinerary - GlobeTrotter',
+                text: 'Check out my amazing 5-day trip to Paris! 🗼✨',
+                url: window.location.href
+            };
+
+            if (navigator.share) {
+                navigator.share(shareData).then(() => {
+                    showSuccessMessage('📱 Shared successfully!');
+                }).catch(() => {
+                    // User cancelled
+                });
+            } else {
+                // Fallback for browsers without Web Share API
+                const message = `Check out this amazing Paris itinerary!\n\n${window.location.href}`;
+                showSuccessMessage('📱 Copy this link to share!');
+                navigator.clipboard.writeText(message);
+            }
+        }
+    </script>
+</body>
+</html>

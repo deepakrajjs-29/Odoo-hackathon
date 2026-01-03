@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Trips - GlobeTrotter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+
+        nav {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px 0;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .nav-brand {
+            font-size: 1.8em;
+            color: white;
+            font-weight: bold;
+            text-decoration: none;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 25px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            padding: 8px 15px;
+            border-radius: 8px;
+        }
+
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            animation: fadeIn 0.6s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .page-header h1 {
+            font-size: 2.5em;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.5);
+        }
+
+        /* Filter Tabs */
+        .filter-tabs {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            animation: slideIn 0.6s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .tab {
+            padding: 12px 25px;
+            background: white;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .tab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        /* Trips Grid */
+        .trips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 30px;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .trip-card {
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .trip-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .trip-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .trip-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 30px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .trip-header::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 10s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .trip-header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .trip-icon {
+            font-size: 3em;
+            margin-bottom: 10px;
+        }
+
+        .trip-name {
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .trip-dates {
+            font-size: 0.95em;
+            opacity: 0.9;
+        }
+
+        .trip-body {
+            padding: 25px;
+        }
+
+        .trip-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .trip-stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: scale(1.05);
+        }
+
+        .stat-value {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-item:hover .stat-value {
+            color: white;
+        }
+
+        .stat-label {
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .stat-item:hover .stat-label {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .trip-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .action-btn-view {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .action-btn-view:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .action-btn-edit {
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .action-btn-edit:hover {
+            background: #e0e0e0;
+            transform: scale(1.05);
+        }
+
+        .action-btn-delete {
+            background: #fff;
+            color: #e74c3c;
+            border: 2px solid #e74c3c;
+        }
+
+        .action-btn-delete:hover {
+            background: #e74c3c;
+            color: white;
+            transform: scale(1.05);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .empty-icon {
+            font-size: 6em;
+            margin-bottom: 20px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .empty-state h2 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .empty-state p {
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .status-upcoming {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-ongoing {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        .status-completed {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .trips-grid {
+                grid-template-columns: 1fr;
+            }
+            .page-header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+            .filter-tabs {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav>
+        <div class="nav-container">
+            <a href="dashboard.html" class="nav-brand">🌍 GlobeTrotter</a>
+            <div class="nav-links">
+                <a href="dashboard.html">Home</a>
+                <a href="my-trips.html">My Trips</a>
+                <a href="city-search.html">Explore</a>
+                <a href="profile.html">Profile</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>My Trips ✈️</h1>
+            <a href="create-trip.html" class="btn btn-primary">+ Create New Trip</a>
+        </div>
+
+        <div class="filter-tabs">
+            <div class="tab active" data-filter="all">All Trips</div>
+            <div class="tab" data-filter="upcoming">Upcoming</div>
+            <div class="tab" data-filter="ongoing">Ongoing</div>
+            <div class="tab" data-filter="completed">Completed</div>
+        </div>
+
+        <div class="trips-grid" id="tripsGrid">
+            <!-- Will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Check authentication
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        if (!currentUser) {
+            window.location.href = 'index.html';
+        }
+
+        let currentFilter = 'all';
+
+        // Tab filtering
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentFilter = tab.dataset.filter;
+                loadTrips();
+            });
+        });
+
+        // Get trip status
+        function getTripStatus(startDate, endDate) {
+            const today = new Date();
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+
+            if (today < start) return 'upcoming';
+            if (today > end) return 'completed';
+            return 'ongoing';
+        }
+
+        // Calculate trip duration
+        function calculateDuration(startDate, endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+            return days;
+        }
+
+        // Load trips
+        function loadTrips() {
+            const trips = JSON.parse(localStorage.getItem('trips'));
+            const stops = JSON.parse(localStorage.getItem('stops'));
+            const activities = JSON.parse(localStorage.getItem('activities'));
+            
+            let userTrips = trips.filter(t => t.userId === currentUser.id);
+
+            // Filter by status
+            if (currentFilter !== 'all') {
+                userTrips = userTrips.filter(trip => {
+                    return getTripStatus(trip.startDate, trip.endDate) === currentFilter;
+                });
+            }
+
+            // Sort by date
+            userTrips.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+
+            const tripsGrid = document.getElementById('tripsGrid');
+
+            if (userTrips.length === 0) {
+                tripsGrid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <div class="empty-icon">🗺️</div>
+                        <h2>No trips found</h2>
+                        <p>Start planning your next adventure!</p>
+                        <a href="create-trip.html" class="btn btn-primary">Create Your First Trip</a>
+                    </div>
+                `;
+                return;
+            }
+
+            tripsGrid.innerHTML = userTrips.map(trip => {
+                const tripStops = stops.filter(s => s.tripId === trip.id);
+                const allActivities = tripStops.flatMap(stop => 
+                    activities.filter(a => a.stopId === stop.id)
+                );
+                const status = getTripStatus(trip.startDate, trip.endDate);
+                const duration = calculateDuration(trip.startDate, trip.endDate);
+
+                return `
+                    <div class="trip-card">
+                        <div class="trip-header">
+                            <div class="trip-header-content">
+                                <div class="trip-icon">🗺️</div>
+                                <div class="trip-name">${trip.name}</div>
+                                <div class="trip-dates">📅 ${formatDate(trip.startDate)} - ${formatDate(trip.endDate)}</div>
+                                <span class="status-badge status-${status}">${status.charAt(0).toUpperCase() + status.slice(1)}</span>
+                            </div>
+                        </div>
+                        <div class="trip-body">
+                            <div class="trip-description">
+                                ${trip.description || 'No description provided'}
+                            </div>
+                            <div class="trip-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value">${duration}</div>
+                                    <div class="stat-label">Days</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${tripStops.length}</div>
+                                    <div class="stat-label">Cities</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">${allActivities.length}</div>
+                                    <div class="stat-label">Activities</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value">$${calculateTripBudget(trip.id)}</div>
+                                    <div class="stat-label">Budget</div>
+                                </div>
+                            </div>
+                            <div class="trip-actions">
+                                <button class="action-btn action-btn-view" onclick="viewTrip('${trip.id}')">View</button>
+                                <button class="action-btn action-btn-edit" onclick="editTrip('${trip.id}')">Edit</button>
+                                <button class="action-btn action-btn-delete" onclick="deleteTrip('${trip.id}')">Delete</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Calculate trip budget
+        function calculateTripBudget(tripId) {
+            const budgets = JSON.parse(localStorage.getItem('budgets'));
+            const tripBudgets = budgets.filter(b => b.tripId === tripId);
+            
+            let total = 0;
+            tripBudgets.forEach(budget => {
+                total += (budget.transport || 0) + (budget.stay || 0) + 
+                         (budget.food || 0) + (budget.activities || 0);
+            });
+            
+            return total.toLocaleString();
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        // View trip
+        function viewTrip(tripId) {
+            window.location.href = 'itinerary-view.html?id=' + tripId;
+        }
+
+        // Edit trip
+        function editTrip(tripId) {
+            window.location.href = 'itinerary-builder.html?id=' + tripId;
+        }
+
+        // Delete trip
+        function deleteTrip(tripId) {
+            if (!confirm('Are you sure you want to delete this trip? This action cannot be undone.')) {
+                return;
+            }
+
+            // Remove trip
+            let trips = JSON.parse(localStorage.getItem('trips'));
+            trips = trips.filter(t => t.id !== tripId);
+            localStorage.setItem('trips', JSON.stringify(trips));
+
+            // Remove related data
+            let stops = JSON.parse(localStorage.getItem('stops'));
+            const tripStops = stops.filter(s => s.tripId === tripId);
+            stops = stops.filter(s => s.tripId !== tripId);
+            localStorage.setItem('stops', JSON.stringify(stops));
+
+            let activities = JSON.parse(localStorage.getItem('activities'));
+            tripStops.forEach(stop => {
+                activities = activities.filter(a => a.stopId !== stop.id);
+            });
+            localStorage.setItem('activities', JSON.stringify(activities));
+
+            let budgets = JSON.parse(localStorage.getItem('budgets'));
+            budgets = budgets.filter(b => b.tripId !== tripId);
+            localStorage.setItem('budgets', JSON.stringify(budgets));
+
+            // Reload trips
+            loadTrips();
+        }
+
+        // Initial load
+        loadTrips();
+    </script>
+</body>
+</html>
